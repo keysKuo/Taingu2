@@ -29,6 +29,10 @@ const UsersModel = new Schema({
     level: {
         type: String,
         required: true
+    },
+    cart: {
+        type: [String],
+        default: ['XM0001', 'D001']
     }
 });
 

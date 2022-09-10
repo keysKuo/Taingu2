@@ -194,7 +194,7 @@ const UsersController = {
                     gid: (gid) ? gid : newGid,
                     pro_name: pro_name,
                     description: description,
-                    price: price,
+                    price: parseInt(price),
                     
                 }
                 req.flash('success', 'Nhập sản phẩm thành công')

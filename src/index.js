@@ -61,7 +61,7 @@ app.get('/home', async (req, res) => {
         .limit(nProducts)
         .skip(skip)
         .then((products) => {
-            if (!products) {
+            if (!products) { 
                 return res.render('home', {
                     username: true,
                     username: req.session.username,
@@ -70,9 +70,10 @@ app.get('/home', async (req, res) => {
             }
             let data = products.map(products => {
                 return {
+                    id: products._id.toString(),
                     pid: products.pid,
                     pro_name: products.pro_name,
-                    price: products.price,
+                    price: (products.price).toLocaleString('vi', {style: 'currency', currency: 'VND'}),
                     image: products.image,
                     slug: products.slug
                 }
@@ -93,8 +94,15 @@ app.get('/home', async (req, res) => {
 });
 app.use('/users', UsersRouter);
 app.use('/product', ProductsRouter);
-app.get('/', (req, res) => {
-    return res.redirect('/home');
+app.get('/', async (req, res) => {
+   
+    var x = await Products.findOne({pid: 'D001'})
+        .then(product => {
+            return product
+        })
+        
+    console.log(x);
+    return res.render('home');
 })
 
 // localhost
