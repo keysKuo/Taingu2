@@ -2,6 +2,8 @@ const express = require('express');
 const Users = require('../models/Users');
 const Products = require('../models/Products');
 const Group = require('../models/Group');
+const ProductService = require('../services/ProductService');
+const fs = require('fs-extra');
 
 const UsersController = {
     getRegister: (req, res, next) => {
@@ -74,7 +76,8 @@ const UsersController = {
                     
                     return res.redirect('/home')
                 } else {
-                    return res.render('login')
+                    req.flash('error', "Thông tin đăng nhập sai");
+                    return res.redirect('/users/login');
                 }
 
             }
@@ -151,11 +154,86 @@ const UsersController = {
             return res.render('products/add-product', {
                 error: error,
                 success: success,
-                options: options
+                options: options,
+                action: '/users/add-product',
+                isAddPage: true
             })
         }))
     },
-    postaddProduct: (req, res, next) => {
+    postCreateProduct: async (req, res, next) => {
+        // Sau khi em goi multer -> file req.file
+        const files = req.files;
+        if(files.length == 0) {
+            req.flash('error', 'Vui lòng nhập hình');
+            return res.redirect('/users/add-product');
+        }
+        
+        const { pid, pro_name, description, gid, newGroup, price } = req.body;
+        if(!pid || !pro_name || !description || !price) {
+            let error = 'Chưa nhập đủ thông tin';
+            return res.send(`<div class="w-90 mt-5 alert alert-danger text-center">${error}</div>`)
+        }
+
+        let imgList = [];
+        files.forEach(file => {
+            let path = `/uploads/${pid}/${file.filename}`;
+            imgList.push(path);
+            // ['/uploads/AD0001/product-image_328329432.png', ...]
+        })
+
+        var newGid = ''
+        if (newGroup && !gid) {
+            Group.findOne({ name: newGroup }).then(group => {
+                if (group) {
+                    req.flash('error', "Ton Tai")
+                    let error = 'Danh mục đã tồn tại';
+                    // return res.redirect('/users/add-product')
+                    return res.send(`<div class="w-90 mt-5 alert alert-danger text-center">${error}</div>`)
+                } else {
+                    let temp = newGroup.split(' ');
+                    let num = '001';
+                    temp.forEach(t => {
+                        newGid += t[0].toUpperCase();
+                    })
+                    newGid = newGid + num;
+                    const newBrand = {
+                        name: newGroup,
+                        gid: newGid
+                    }
+                    new Group(newBrand).save()
+                    
+                }
+            })
+        }
+
+        let product = await ProductService.getOne({pid: pid});
+        if (!product) {
+            var newPro = {
+                pid: pid,
+                gid: (gid) ? gid : newGid,
+                pro_name: pro_name,
+                description: description,
+                price: parseInt(price),
+                images: imgList
+                
+            }
+            req.flash('success', 'Nhập sản phẩm thành công')
+            // new Products(newPro).save()
+            await ProductService.create(newPro)
+            let success = 'Nhập sản phẩm thành công'
+            return res.send(`<div class="w-90 mt-5 alert alert-success text-center">${success}</div>`)
+        }
+        else {
+            req.flash('error', 'Sản phẩm đã tồn tại')
+            let error = 'Sản phẩm đã tồn tại';
+            // return res.redirect('/users/add-product')
+            return res.send(`<div class="w-90 mt-5 alert alert-danger text-center">${error}</div>`)
+        }
+
+    },
+
+
+    postaddProduct: async (req, res, next) => {
         const { pid, pro_name, description, gid, newGroup, price } = req.body;
 
         if(!pid || !pro_name || !description || !price) {
@@ -187,29 +265,133 @@ const UsersController = {
                 }
             })
         }
-        Products.findOne({ pid: pid }).then((product) => {
-            if (!product) {
-                var newPro = {
-                    pid: pid,
-                    gid: (gid) ? gid : newGid,
-                    pro_name: pro_name,
-                    description: description,
-                    price: parseInt(price),
-                    
-                }
-                req.flash('success', 'Nhập sản phẩm thành công')
-                new Products(newPro).save()
-                let success = 'Nhập sản phẩm thành công'
-                return res.send(`<div class="w-90 mt-5 alert alert-success text-center">${success}</div>`)
-                // return res.redirect('/users/add-product')
-            } else {
-                req.flash('error', 'Sản phẩm đã tồn tại')
-                let error = 'Sản phẩm đã tồn tại';
-                // return res.redirect('/users/add-product')
-                return res.send(`<div class="w-90 mt-5 alert alert-danger text-center">${error}</div>`)
+
+        let product = await ProductService.getOne({pid: pid});
+        if (!product) {
+            var newPro = {
+                pid: pid,
+                gid: (gid) ? gid : newGid,
+                pro_name: pro_name,
+                description: description,
+                price: parseInt(price),
+                
             }
+            req.flash('success', 'Nhập sản phẩm thành công')
+            // new Products(newPro).save()
+            await ProductService.create(newPro)
+            let success = 'Nhập sản phẩm thành công'
+            return res.send(`<div class="w-90 mt-5 alert alert-success text-center">${success}</div>`)
+        }
+        else {
+            req.flash('error', 'Sản phẩm đã tồn tại')
+            let error = 'Sản phẩm đã tồn tại';
+            // return res.redirect('/users/add-product')
+            return res.send(`<div class="w-90 mt-5 alert alert-danger text-center">${error}</div>`)
+        }
+
+        // Products.findOne({ pid: pid }).then( async (product) => {
+        //     if (!product) {
+        //         var newPro = {
+        //             pid: pid,
+        //             gid: (gid) ? gid : newGid,
+        //             pro_name: pro_name,
+        //             description: description,
+        //             price: parseInt(price),
+                    
+        //         }
+        //         req.flash('success', 'Nhập sản phẩm thành công')
+        //         // new Products(newPro).save()
+        //         await ProductService.create(newPro)
+        //         let success = 'Nhập sản phẩm thành công'
+        //         return res.send(`<div class="w-90 mt-5 alert alert-success text-center">${success}</div>`)
+        //         // return res.redirect('/users/add-product')
+        //     } else {
+        //         req.flash('error', 'Sản phẩm đã tồn tại')
+        //         let error = 'Sản phẩm đã tồn tại';
+        //         // return res.redirect('/users/add-product')
+        //         return res.send(`<div class="w-90 mt-5 alert alert-danger text-center">${error}</div>`)
+        //     }
+        // })
+    }, 
+    getUpdateProduct: async (req, res, next) => {
+        const id = req.params.id;
+        const success = req.flash('success') || '';
+        const error = req.flash('error') || '';
+
+        let product = await ProductService.getOne({id: id});
+        
+        return res.render('products/add-product', {
+            data: product,
+            username: req.session.username,
+            success, error,
+            action: '/users/update-product',
+            isAddPage: false
         })
-    }
+
+    },
+
+    postUpdateProduct: async (req, res, next) => {
+        const files = req.files;
+        const { _id, pid, pro_name, description, price , old_images } = req.body;
+        let old_images_list = old_images.split(',');
+        
+        var data = {
+            // pid: pid,
+            pro_name: pro_name,
+            description: description,
+            price: price,
+            images: []
+        }
+        if(files.length == 0) {
+            data.images = old_images_list;
+            await ProductService.update(_id, data)
+                .then( () => {
+                    req.flash('success', "Sửa sản phẩm thành công");
+                    return res.redirect(`/users/update-product/${_id}`)
+                })
+                .catch( () => {
+                    req.flash('error', "Sửa sản phẩm thất bại");
+                    return res.redirect(`/users/update-product/${_id}`)
+                })
+           
+        }
+        else {
+            files.forEach(file => {
+                let path = `/uploads/${pid}/${file.filename}`;
+                data.images.push(path);
+            })
+
+            
+
+            await ProductService.update(_id, data)
+                .then( () => {
+                    old_images_list.forEach(image => {
+                        let path = './src/public' + image;
+                        fs.unlink(path);
+                    })
+                    req.flash('success', "Sửa sản phẩm thành công");
+                    return res.redirect(`/users/update-product/${_id}`)
+                })
+                .catch( () => {
+                    
+                    req.flash('error', "Sửa sản phẩm thất bại");
+                    return res.redirect(`/users/update-product/${_id}`)
+                })
+        }
+        
+
+    }   
+
+    // postUpdateProduct: async (req, res, next) => {
+    //     const file = req.file;
+    //     if(files.length == 0) {
+    //         req.flash('error', 'Vui lòng nhập hình ảnh');
+    //         return res.redirect('/admin/updateProduct');
+    //     }
+
+    //     const { pro_name, pid, description, price} = req.body;
+        
+    // }
 }
 
 module.exports = UsersController;

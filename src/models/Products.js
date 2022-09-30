@@ -19,8 +19,8 @@ const ProductsModel = new Schema({
         type: Number,
         required: true
     },
-    image: {
-        type: String,
+    images: {
+        type: [String],
     },
     slug: {
         type: String,

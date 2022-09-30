@@ -74,7 +74,7 @@ app.get('/home', async (req, res) => {
                     pid: products.pid,
                     pro_name: products.pro_name,
                     price: (products.price).toLocaleString('vi', {style: 'currency', currency: 'VND'}),
-                    image: products.image,
+                    image: products.images[0],
                     slug: products.slug
                 }
             });

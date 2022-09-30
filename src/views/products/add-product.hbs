@@ -1,11 +1,12 @@
 <div class="mainDiv">
     <div class="cardStyle">
-        <form style="position: relative;" action="/users/add-product" method="post">
+        <form style="position: relative;" action="{{action}}" method="post" enctype="multipart/form-data">
 
             <img src="/img/logo.jpeg" id="signupLogo" />
             <h2 class="formTitle">
                 Nhập Sản Phẩm
             </h2>
+            {{#if isAddPage}}
             <div class="inputDiv">
                 <label class="inputLabel" for="type">Loại Sản Phẩm</label>
                 <select id="selector" name="gid" class="form-control">
@@ -22,21 +23,40 @@
                 <input name="newGroup" type="text" id="newGroup" placeholder="Nhập Loại Sản Phẩm Khác">
             </div>
 
+            {{/if}}
+
+            
+
             <div class="inputDiv">
-                <label class="inputLabel" for="gid">ID San Pham</label>
-                <input type="text" id="pid" name="pid" placeholder="Nhập mã sản phẩm">
+                <label class="inputLabel" for="pid">ID San Pham</label>
+                <input {{#if isAddPage}}{{else}}readonly{{/if}} value="{{data.pid}}" type="text" id="pid" name="pid" placeholder="Nhập mã sản phẩm">
             </div>
             <div class="inputDiv">
                 <label class="inputLabel" for="pro_name">Tên Sản Phẩm</label>
-                <input type="text" id="pro_name" name="pro_name" placeholder="Nhập tên sản phẩm">
+                <input value="{{data.pro_name}}" type="text" id="pro_name" name="pro_name" placeholder="Nhập tên sản phẩm">
             </div>
             <div class="inputDiv">
                 <label class="inputLabel" for="description">Mô tả</label>
-                <input type="text" id="description" name="description" placeholder="Nhập mô tả sản phẩm">
+                <input value="{{data.description}}" type="text" id="description" name="description" placeholder="Nhập mô tả sản phẩm">
             </div>
             <div class="inputDiv">
                 <label class="inputLabel" for="price">Giá sản phẩm</label>
-                <input type="text" id="price" name="price" placeholder="Nhập giá sản phẩm">
+                <input value="{{data.price}}" type="text" id="price" name="price" placeholder="Nhập giá sản phẩm">
+            </div>
+            <div class="inputDiv">
+                <label class="inputLabel" for="product-image">Chọn hình (1920x1080)</label>
+                
+                <input type="file" id="product-image" name="product-image" placeholder="Nhập hình" multiple>
+
+                {{#if isAddPage}}
+                {{else}}
+                    <input class="d-none" type="text" name="_id" value="{{data._id}}">
+                    <input class="d-none" type="text" value="{{data.images}}" name="old_images">
+                    {{#each data.images}}
+                        <img src="{{this}}" alt="">
+                    {{/each}}
+                {{/if}}
+                
             </div>
             {{!-- <div class="inputDiv">
                 <label class="inputLabel" for="image">Hình ảnh sản phẩm</label>
@@ -83,7 +103,7 @@
 
         {{!-- console.log(window.location.href); --}}
         $('.loader').hide();
-        $('.submit').click(function(e) {
+        {{!-- $('.submit').click(function(e) {
             e.preventDefault();
 
             let pid = $('#pid').val();
@@ -115,6 +135,6 @@
             
 
             
-        })
+        }) --}}
     })
 </script>
