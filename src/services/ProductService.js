@@ -1,6 +1,7 @@
 const { findByIdAndUpdate } = require('../models/Products');
 const Products = require('../models/Products');
 
+// API
 const ProductService = {
     getOne: async (options) => {
         if(options.id) {
@@ -56,7 +57,6 @@ const ProductService = {
     delete: async (id) => {
         return await Products.findByIdAndDelete(id);
     },
-
     update: async (id, data) => {
         return await Products.findByIdAndUpdate(id, {$set: data});
     }

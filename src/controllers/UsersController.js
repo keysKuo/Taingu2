@@ -357,11 +357,10 @@ const UsersController = {
         }
         else {
             files.forEach(file => {
+                // logo.png
                 let path = `/uploads/${pid}/${file.filename}`;
                 data.images.push(path);
             })
-
-            
 
             await ProductService.update(_id, data)
                 .then( () => {
@@ -373,7 +372,11 @@ const UsersController = {
                     return res.redirect(`/users/update-product/${_id}`)
                 })
                 .catch( () => {
-                    
+                    data.images.forEach(image => {
+                        let path = './src/public' + image;
+                        fs.unlink(path);
+                    })
+                    data.images = old_images_list;
                     req.flash('error', "Sửa sản phẩm thất bại");
                     return res.redirect(`/users/update-product/${_id}`)
                 })

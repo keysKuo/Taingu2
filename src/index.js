@@ -94,6 +94,44 @@ app.get('/home', async (req, res) => {
 });
 app.use('/users', UsersRouter);
 app.use('/product', ProductsRouter);
+
+
+function f(str) {
+    str = str + "0000";
+    return;
+}
+app.get('/cart', async (req, res, next) => {
+    let items_id = req.flash('items_id')[0] || '';
+    if(items_id)
+        items_id = items_id.split(' ');
+
+    let cart = await Products.find({pid: {$in: items_id}})
+        .then(products => {
+            return products.map((product, index) => {
+                return {
+                    idx: index + 1,
+                    _id: product._id.toString(),
+                    pid: product.pid,
+                    pro_name: product.pro_name,
+                    price: product.price.toLocaleString('vi', {style: 'currency', currency: 'VND'}),
+                    image: product.images[0],
+                    slug: product.slug
+
+                }
+            })
+        })
+
+    return res.render('products/cart', {
+        data: cart,
+    })
+})
+app.post('/cart', async (req, res, next) => {
+    const items_id = req.body.items_id.trim();
+    // mongoose find $in
+    req.flash('items_id', items_id);
+    return res.redirect('/cart');
+})
+
 app.get('/', async (req, res) => {
    
     var x = await Products.findOne({pid: 'D001'})

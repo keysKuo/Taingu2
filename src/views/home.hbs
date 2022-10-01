@@ -47,9 +47,9 @@
                     <h6 class="product-title mt-3 ml-2">[{{pid}}] {{pro_name}}</h6>
                     <div class="mt-2 ml-2" style="text-decoration:line-through; color: grey">2.500.000đ</div>
                     <div class="mt-2 ml-2">Giá: {{price}}</div>
-
-                    <button class="text-center submit-cart mt-3">
-                        <a class="text-decoration-none" href="#">Mua Ngay <i class="fa fa-shopping-cart"></i></a>
+                    
+                    <button onclick="addCart('{{pid}}')" class="text-center submit-cart mt-3">
+                        Mua Ngay <i class="fa fa-shopping-cart"></i>
                     </button>
                 </div>
             </div>
@@ -79,6 +79,21 @@
 
 </div>
 
+<script>
+    function addCart(pid) {
+        let pid_list = document.getElementById('input_cart').value;
+        pid_list += pid + ' '; // AM0001,BA0002,CA0005
+        document.getElementById('input_cart').value = pid_list;
+    }
+
+    $(document).ready(function() {
+        $('.submit-cart').click(function() {
+            let pid = $(this).siblings('h6').text();
+            alert('Đã thêm sản phẩm ' + pid + ' vào giỏ hàng');
+            
+        })
+    })
+</script>
 
 {{!-- <div class="wrapper">
   <div class="loader">

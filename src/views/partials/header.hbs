@@ -37,7 +37,10 @@
                 </li>
             </ul>
 
-            <div><a href="#"><i class="bi bi-cart3"></i></a></div>
+            <form action="/cart" method="POST">
+                <input type="hidden" id="input_cart" name="items_id" value="">
+                <div><button style="border: none; background-color: white" type="submit" href="#"><i class="bi bi-cart3"></i></button></div>
+            </form>
 
             {{#if username}}
             <div class="username-header">
@@ -76,3 +79,4 @@
         </div>
     </nav>
 </div>
+
