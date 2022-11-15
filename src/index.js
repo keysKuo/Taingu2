@@ -11,7 +11,7 @@ const Products = require('./models/Products');
 const Group = require('./models/Group');
 const UsersRouter = require('./routers/UsersRouter');
 const ProductsRouter = require('./routers/ProductsRouter');
-const port = 3000;
+const port = 4000;
 database.connect();
 //  config
 app.set('view engine', 'hbs');
