@@ -11,7 +11,7 @@ const Products = require('./models/Products');
 const Group = require('./models/Group');
 const UsersRouter = require('./routers/UsersRouter');
 const ProductsRouter = require('./routers/ProductsRouter');
-const port = 4000;
+const port = process.env.PORT || 4000;
 database.connect();
 //  config
 app.set('view engine', 'hbs');
